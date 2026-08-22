@@ -146,6 +146,18 @@ instead of a clean fallback.
 Repo secrets for a release: `RELEASE_KEYSTORE_BASE64`, `RELEASE_KEYSTORE_PASSWORD`,
 `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`.
 
+## Local development
+
+AGP 9 needs **JDK 17**. A machine whose default `java` is newer will fail before Gradle
+starts, with a message about the Gradle daemon rather than about the JDK, so it is worth
+checking first:
+
+```bash
+JAVA_HOME=$(/usr/libexec/java_home -v 17) ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew assembleDebug
+```
+
+On macOS, `brew install openjdk@17` if `/usr/libexec/java_home -v 17` finds nothing.
+
 ## The sample
 
 `sample/` is a minimal Compose app wired to the convention plugin exactly as a real app is.
