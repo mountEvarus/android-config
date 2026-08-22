@@ -1,0 +1,161 @@
+name: Android app
+
+# Reusable build/release pipeline for every personal-OS Android app. An app's own workflow
+# is a handful of lines that calls this one, so the version logic, signing and release steps
+# exist once rather than in four slightly-diverged copies.
+#
+#   jobs:
+#     android:
+#       uses: mountEvarus/android-config/.github/workflows/android-app.yml@main
+#       with:
+#         app-name: finance
+#         release-title: Finance (Android)
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      app-name:
+        description: Short app name. Names the release asset (<app-name>.apk) and the default signing key alias.
+        required: true
+        type: string
+      release-title:
+        description: Human-readable name used in the GitHub release title.
+        required: true
+        type: string
+      working-directory:
+        description: Path to the Gradle project.
+        required: false
+        type: string
+        default: mobile
+      install-notes:
+        description: Extra text appended to the release notes.
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  # Compiles, lints and tests. Needs no secrets, so it gates every PR. compileDebugKotlin
+  # runs KSP, which is where Room/Hilt/Moshi codegen breakage surfaces.
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Lint, test and compile
+        run: ./gradlew ktlintCheck lintDebug testDebugUnitTest assembleDebug
+
+  # Builds, signs and publishes. main and manual dispatch only.
+  release:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release create
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # full history and tags, for the monotonic version check
+          submodules: recursive
+
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Resolve version and enforce monotonic semver
+        id: version
+        run: |
+          set -euo pipefail
+          source version.properties
+          PATCH="${GITHUB_RUN_NUMBER}"
+          VERSION="${VERSION_MAJOR}.${VERSION_MINOR}.${PATCH}"
+
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Resolved version '$VERSION' is not valid semver (MAJOR.MINOR.PATCH)." >&2
+            exit 1
+          fi
+
+          # Legacy mobile-v* and bare v* prefixes are matched too, so the guard still sees
+          # history across the prefix renames. Prefixes are stripped before sorting:
+          # --sort=-v:refname orders by the whole ref, so it would sort by prefix instead.
+          LAST="$(git tag --list 'android-v[0-9]*.[0-9]*.[0-9]*' 'mobile-v[0-9]*.[0-9]*.[0-9]*' 'v[0-9]*.[0-9]*.[0-9]*' \
+            | sed -E 's/^(android-|mobile-)?v//' | sort -V | tail -n1)"
+          if [ -n "$LAST" ]; then
+            HIGHEST="$(printf '%s\n%s\n' "$LAST" "$VERSION" | sort -V | tail -n1)"
+            if [ "$VERSION" = "$LAST" ] || [ "$HIGHEST" != "$VERSION" ]; then
+              echo "::error::Version $VERSION is not greater than the last released $LAST. Bump MAJOR/MINOR in ${{ inputs.working-directory }}/version.properties." >&2
+              exit 1
+            fi
+            echo "Version check OK: $LAST -> $VERSION"
+          else
+            echo "No prior version tag; starting at $VERSION"
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "code=$PATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Decode release keystore
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 secret is missing. Add the release signing secrets before releasing." >&2
+            exit 1
+          fi
+          mkdir -p keystore
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 --decode > keystore/release.jks
+
+      - name: Build signed release APK
+        env:
+          RELEASE_KEYSTORE_FILE: keystore/release.jks
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+          VERSION_NAME: ${{ steps.version.outputs.version }}
+        run: ./gradlew assembleRelease
+
+      - name: Stage APK
+        run: cp app/build/outputs/apk/release/app-release.apk "${{ inputs.app-name }}.apk"
+
+      # One release per version, tagged android-v<VERSION>. `gh release create` creates the
+      # tag, so there is no separate tagging step. A predictable "latest" release and a fixed
+      # asset name are the contract the self-hosted F-Droid repo downloads against.
+      - name: Publish signed APK to a versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          APP: ${{ inputs.app-name }}
+          TITLE: ${{ inputs.release-title }}
+          EXTRA: ${{ inputs.install-notes }}
+        run: |
+          gh release create "android-v${VERSION}" "${APP}.apk" \
+            --title "${TITLE} v${VERSION}" \
+            --latest \
+            --notes "Signed release APK (v${VERSION}) auto-built from ${GITHUB_SHA}.
+
+          To install: on your phone open this release, download ${APP}.apk, and tap it (allow your browser to install unknown apps the first time). Every build is signed with the same key, so new versions install over the old one.
+
+          ${EXTRA}"
