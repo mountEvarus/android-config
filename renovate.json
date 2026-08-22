@@ -5,7 +5,6 @@
   "dependencyDashboard": true,
   "enabledManagers": ["gradle", "gradle-wrapper", "github-actions"],
   "prConcurrentLimit": 3,
-  "schedule": ["before 6am on monday"],
   "packageRules": [
     {
       "description": "The build toolchain moves as a unit, so a mismatch never lands half-applied.",
