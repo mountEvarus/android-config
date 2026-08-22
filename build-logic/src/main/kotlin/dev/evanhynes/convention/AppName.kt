@@ -32,8 +32,8 @@ object AppName {
 
         require(name.matches(Regex("[a-z][a-z0-9]*"))) {
             "$PROPERTY is '$name'. It becomes a package segment, so it must be lowercase " +
-                "letters and digits only, starting with a letter. 'film-roll' would be invalid; " +
-                "'filmroll' is what that app uses."
+                "letters and digits only, starting with a letter. 'long-name' would be " +
+                "invalid; 'longname' is the form to use."
         }
         return name
     }

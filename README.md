@@ -144,10 +144,10 @@ building or releasing.
 
 ## Submodules
 
-The workflow initialises **only** `packages/android-config`, not every submodule. A repo like
-finance also carries private `js-config` and `go-config` submodules, and `submodules: recursive`
-would fail trying to clone them with the default token. The Android build never reads them, so
-it does not ask for them, and no PAT is needed anywhere in this pipeline.
+The workflow initialises **only** `packages/android-config`, not every submodule. A consuming
+repo may also carry private submodules for its other surfaces, and `submodules: recursive` would
+fail trying to clone those with the default token. The Android build never reads them, so it does
+not ask for them, and no PAT is needed anywhere in this pipeline.
 
 ## Environment config
 

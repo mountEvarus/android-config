@@ -1,6 +1,6 @@
 name: Android app
 
-# Reusable build/release pipeline for every personal-OS Android app. An app's own workflow
+# Reusable build/release pipeline for every consuming Android app. An app's own workflow
 # is a handful of lines that calls this one, so the version logic, signing and release steps
 # exist once rather than in four slightly-diverged copies.
 #
@@ -8,8 +8,8 @@ name: Android app
 #     android:
 #       uses: mountEvarus/android-config/.github/workflows/android-app.yml@main
 #       with:
-#         app-name: finance
-#         release-title: Finance (Android)
+#         app-name: foo
+#         release-title: Foo (Android)
 #       secrets: inherit
 
 on:
@@ -215,7 +215,7 @@ jobs:
 
       # One release per version, tagged android-v<VERSION>. `gh release create` creates the
       # tag, so there is no separate tagging step. A predictable "latest" release and a fixed
-      # asset name are the contract the self-hosted F-Droid repo downloads against.
+      # asset name are the contract the downstream package index builds against.
       - name: Publish signed APK to a versioned release
         env:
           GH_TOKEN: ${{ github.token }}

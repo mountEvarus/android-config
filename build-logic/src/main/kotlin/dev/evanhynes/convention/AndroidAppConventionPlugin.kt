@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 /**
- * Everything identical across the personal-OS Android apps. An app applies this instead of
+ * Everything identical across the consuming Android apps. An app applies this instead of
  * the android/kotlin/compose plugin stack, so its build file carries dependencies and
  * genuinely app-specific config, and nothing else.
  */
@@ -77,10 +77,10 @@ class AndroidAppConventionPlugin : Plugin<Project> {
 
             lint {
                 // Real lint errors fail the build. Warnings are reported but do not, which is
-                // deliberate: promoting them turned six cosmetic findings in film-roll (an
-                // inlined int constant, two forward-compatible widget attributes, three
-                // resource nits) into a red build. A gate that fires on themed-icon advice is
-                // one that gets switched off entirely.
+                // deliberate: promoting them turned a handful of cosmetic findings (an inlined
+                // int constant, forward-compatible widget attributes, resource nits) into a red
+                // build. A gate that fires on themed-icon advice is one that gets switched off
+                // entirely.
                 abortOnError = true
                 warningsAsErrors = false
                 // Dependency freshness is Renovate's job. Failing on it would make every app
