@@ -44,8 +44,21 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          submodules: recursive
+
+      # Only android-config, deliberately. `submodules: recursive` would also clone a
+      # repo's js-config and go-config, which are private and would need a PAT, for
+      # submodules an Android build never reads. android-config is public, so this needs
+      # no token at all.
+      - name: Fetch the android-config submodule
+        working-directory: .
+        run: |
+          set -euo pipefail
+          if [ -f .gitmodules ] && git config -f .gitmodules --get submodule.packages/android-config.url >/dev/null; then
+            git submodule update --init --depth 1 packages/android-config
+          else
+            echo "::error::packages/android-config submodule is missing. This workflow builds against it." >&2
+            exit 1
+          fi
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
@@ -96,7 +109,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # full history and tags, for the monotonic version check
-          submodules: recursive
+
+      # Only android-config, deliberately. `submodules: recursive` would also clone a
+      # repo's js-config and go-config, which are private and would need a PAT, for
+      # submodules an Android build never reads. android-config is public, so this needs
+      # no token at all.
+      - name: Fetch the android-config submodule
+        working-directory: .
+        run: |
+          set -euo pipefail
+          if [ -f .gitmodules ] && git config -f .gitmodules --get submodule.packages/android-config.url >/dev/null; then
+            git submodule update --init --depth 1 packages/android-config
+          else
+            echo "::error::packages/android-config submodule is missing. This workflow builds against it." >&2
+            exit 1
+          fi
 
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
