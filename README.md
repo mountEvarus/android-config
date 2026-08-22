@@ -98,9 +98,9 @@ name: Android
 on:
   push:
     branches: [main]
-    paths: ['mobile/**', 'packages/android-config/**', '.github/workflows/android.yml']
+    paths: ['mobile/**', 'packages/android-config', '.github/workflows/android.yml']
   pull_request:
-    paths: ['mobile/**', 'packages/android-config/**', '.github/workflows/android.yml']
+    paths: ['mobile/**', 'packages/android-config', '.github/workflows/android.yml']
   workflow_dispatch:
 
 concurrency:
@@ -139,6 +139,11 @@ embedded Kotlin is too old to compile against KSP's current metadata:
 ```kotlin
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 ```
+
+Note the submodule path has no `/**`. A submodule bump changes the gitlink path itself
+(`:160000 160000 abc def M packages/android-config`), and a `/**` pattern needs a segment
+beneath it, so it would never match: the app would take a catalog update without ever
+building or releasing.
 
 ## Submodules
 
