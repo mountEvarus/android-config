@@ -1,6 +1,6 @@
 # android-config
 
-Shared build configuration for the personal-OS Android apps. Sibling to
+Shared build configuration for the Android apps. Sibling to
 [go-config](https://github.com/mountEvarus/go-config) and
 [js-config](https://github.com/mountEvarus/js-config), consumed the same way: as a git
 submodule under `packages/`.
@@ -13,9 +13,6 @@ build-logic/                        the convention plugin
 .github/workflows/android-app.yml   the reusable build/release workflow
 sample/                             a minimal app that proves the plugin works
 ```
-
-Conventions and the reasoning behind them live in the `personal-os` skill, in
-`references/android.md`. This README covers only how to wire a repo up.
 
 ## Adding it to an app
 
@@ -72,7 +69,7 @@ dependencies {
 (`dev.evanhynes.<name>`) and the default signing key alias:
 
 ```properties
-android.app.name=finance
+android.app.name=foo
 ```
 
 Required, with no fallback, and the build fails with an explanatory message if it is
@@ -82,7 +79,7 @@ would install alongside the old one rather than replacing it, stranding its data
 
 For an existing app the value must match the applicationId already published. It becomes a
 package segment, so it must be lowercase letters and digits, starting with a letter, which
-is why film-roll uses `filmroll`.
+is why long-name uses `longname`.
 
 `mobile/version.properties` holds the hand-bumped part of the version:
 
@@ -111,8 +108,8 @@ jobs:
   android:
     uses: mountEvarus/android-config/.github/workflows/android-app.yml@main
     with:
-      app-name: finance
-      release-title: Finance (Android)
+      app-name: foo
+      release-title: Foo (Android)
     secrets: inherit
 ```
 
