@@ -236,9 +236,16 @@ three groups rather than a stream:
 The toolchain is one group on purpose: AGP, Kotlin, KSP and Gradle have to stay mutually
 compatible, so a half-applied bump is worse than no bump.
 
-No `schedule`: this repo exists to hold dependency versions, so batching updates to one
-morning a week would leave a stale toolchain unnoticed for up to seven days. Noise is
-handled by `prConcurrentLimit` and the dependency dashboard instead.
+Daily, overnight: `"schedule": ["before 6am"]` with `"timezone": "Europe/London"`, so PRs
+are waiting in the morning rather than arriving mid-task. The timezone is set explicitly
+because Renovate defaults to UTC, which drifts against local time across DST.
+
+Weekly was the first attempt and was wrong: this repo exists to hold dependency versions,
+so a seven-day window leaves a stale toolchain unnoticed for most of it.
+
+Rate limiting is separate from the schedule. Renovate's defaults cap new PRs at 2 per hour,
+and `prConcurrentLimit: 3` caps open PRs at 3, so the steady state is a few PRs refreshed
+as they are merged.
 
 Because every consuming app takes its versions from this catalog, one merged PR here is
 the update for all of them. Each app then picks it up by bumping its submodule pointer.
