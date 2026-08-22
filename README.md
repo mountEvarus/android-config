@@ -234,8 +234,11 @@ three groups rather than a stream:
 | github actions | the SHA-pinned actions in the reusable workflow |
 
 The toolchain is one group on purpose: AGP, Kotlin, KSP and Gradle have to stay mutually
-compatible, so a half-applied bump is worse than no bump. Weekly schedule, three
-concurrent PRs, dependency dashboard on.
+compatible, so a half-applied bump is worse than no bump.
+
+No `schedule`: this repo exists to hold dependency versions, so batching updates to one
+morning a week would leave a stale toolchain unnoticed for up to seven days. Noise is
+handled by `prConcurrentLimit` and the dependency dashboard instead.
 
 Because every consuming app takes its versions from this catalog, one merged PR here is
 the update for all of them. Each app then picks it up by bumping its submodule pointer.
