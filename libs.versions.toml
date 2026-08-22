@@ -42,6 +42,9 @@ glance = "1.1.1"
 
 camerax = "1.5.0"
 mlkit-barcode = "17.3.0"
+# Runtime dependency of health's vendored Samsung Health Data SDK AAR, which references
+# com.google.gson internally and declares no transitive dependencies of its own.
+gson = "2.14.0"
 health-connect = "1.1.0-rc02"
 maps-compose = "6.4.1"
 play-services-maps = "19.2.0"
@@ -106,6 +109,7 @@ camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.r
 camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 mlkit-barcode = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit-barcode" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 health-connect-client = { group = "androidx.health.connect", name = "connect-client", version.ref = "health-connect" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "play-services-maps" }
