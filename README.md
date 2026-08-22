@@ -120,7 +120,7 @@ Applied by `id("dev.evanhynes.android.app")`:
 - `versionName`/`versionCode` from `version.properties` plus the CI run number
 - the release signing config, from `keystore.properties` or `RELEASE_KEYSTORE_*`
 - JDK 17 source/target and jvmTarget
-- Android Lint with `abortOnError` and `warningsAsErrors`
+- Android Lint with `abortOnError` (errors fail the build, warnings are reported)
 - unit tests with Android resources and default return values enabled
 
 An app still declares anything genuinely its own: `buildConfigField`,
