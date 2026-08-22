@@ -75,8 +75,14 @@ dependencies {
 android.app.name=finance
 ```
 
-Without it the name falls back to the repo directory, so a repo whose directory already
-matches needs no entry at all.
+Required, with no fallback, and the build fails with an explanatory message if it is
+missing. Deriving it from the directory name would let a repo rename silently change the
+applicationId, and to Android a different applicationId is a different app: the update
+would install alongside the old one rather than replacing it, stranding its data.
+
+For an existing app the value must match the applicationId already published. It becomes a
+package segment, so it must be lowercase letters and digits, starting with a letter, which
+is why film-roll uses `filmroll`.
 
 `mobile/version.properties` holds the hand-bumped part of the version:
 
