@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "The build toolchain moves as a unit. One PR, so a mismatch never lands half-applied.",
+      "groupName": "android build toolchain",
+      "matchPackageNames": [
+        "com.android.tools.build:gradle",
+        "org.jetbrains.kotlin:{/,}**",
+        "com.google.devtools.ksp:{/,}**",
+        "org.jlleitschuh.gradle:ktlint-gradle"
+      ],
+      "matchManagers": ["gradle", "gradle-wrapper"]
+    },
+    {
+      "description": "AndroidX moves together and is high volume. One PR keeps it readable.",
+      "groupName": "androidx",
+      "matchPackageNames": ["androidx.{/,}**"]
+    }
+  ]
+}
