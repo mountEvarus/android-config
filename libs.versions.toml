@@ -27,7 +27,7 @@ activity-compose = "1.11.0"
 lifecycle = "2.9.4"
 navigation = "2.9.5"
 
-hilt = "2.57.2"
+hilt = "2.60.1"
 hilt-androidx = "1.2.0"
 
 retrofit = "3.0.0"
