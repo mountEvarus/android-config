@@ -2,22 +2,37 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
+  "dependencyDashboard": true,
+  "enabledManagers": ["gradle", "gradle-wrapper", "github-actions"],
+  "prConcurrentLimit": 3,
+  "schedule": ["before 6am on monday"],
   "packageRules": [
     {
-      "description": "The build toolchain moves as a unit. One PR, so a mismatch never lands half-applied.",
+      "description": "The build toolchain moves as a unit, so a mismatch never lands half-applied.",
       "groupName": "android build toolchain",
+      "matchManagers": ["gradle"],
       "matchPackageNames": [
         "com.android.tools.build:gradle",
         "org.jetbrains.kotlin:{/,}**",
         "com.google.devtools.ksp:{/,}**",
         "org.jlleitschuh.gradle:ktlint-gradle"
-      ],
-      "matchManagers": ["gradle", "gradle-wrapper"]
+      ]
     },
     {
-      "description": "AndroidX moves together and is high volume. One PR keeps it readable.",
+      "description": "The Gradle distribution belongs with the toolchain it has to stay compatible with.",
+      "groupName": "android build toolchain",
+      "matchManagers": ["gradle-wrapper"]
+    },
+    {
+      "description": "AndroidX is high volume and moves together. One PR keeps it readable.",
       "groupName": "androidx",
+      "matchManagers": ["gradle"],
       "matchPackageNames": ["androidx.{/,}**"]
+    },
+    {
+      "description": "Actions are SHA-pinned, so these PRs are pin refreshes rather than feature changes.",
+      "groupName": "github actions",
+      "matchManagers": ["github-actions"]
     }
   ]
 }

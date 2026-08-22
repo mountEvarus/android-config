@@ -216,5 +216,26 @@ Compose to stay on 8.x was the worse trade.
 `compileSdk` is 37 so the apps compile against the newest APIs. `targetSdk` stays 36, so
 nothing opts into Android 17 runtime behaviour changes until something needs them.
 
-Renovate groups the toolchain (AGP, Kotlin, KSP, ktlint) into one PR and AndroidX into
-another, so updates arrive as a few reviewable PRs rather than a stream.
+## Dependency updates
+
+Renovate is configured in `renovate.json` and scoped deliberately:
+
+```json
+"enabledManagers": ["gradle", "gradle-wrapper", "github-actions"]
+```
+
+`enabledManagers` is a whitelist, so nothing else is ever picked up. Updates arrive in
+three groups rather than a stream:
+
+| Group | Contents |
+|---|---|
+| android build toolchain | AGP, Kotlin, KSP, ktlint, and the Gradle distribution |
+| androidx | everything under `androidx.*` |
+| github actions | the SHA-pinned actions in the reusable workflow |
+
+The toolchain is one group on purpose: AGP, Kotlin, KSP and Gradle have to stay mutually
+compatible, so a half-applied bump is worse than no bump. Weekly schedule, three
+concurrent PRs, dependency dashboard on.
+
+Because every consuming app takes its versions from this catalog, one merged PR here is
+the update for all of them. Each app then picks it up by bumping its submodule pointer.
