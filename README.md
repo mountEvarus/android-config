@@ -140,6 +140,29 @@ embedded Kotlin is too old to compile against KSP's current metadata:
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 ```
 
+## Environment config
+
+The workflow writes `mobile/local.properties` before building, from repo-level settings:
+
+| Source | Key |
+|---|---|
+| `vars.API_BASE_URL` | `api.base.url` |
+| `secrets.DEVICE_API_KEY` | `device.api.key` |
+| `secrets.GOOGLE_MAPS_API_KEY` | `google.maps.api.key` |
+
+Only keys that are set get written, so an app that does not use one falls back to its build
+default. Apps read them the usual way and expose what they need as `buildConfigField`:
+
+```kotlin
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
+}
+// ...
+buildConfigField("String", "API_BASE_URL", "\"${localProperties.getProperty("api.base.url", "http://10.0.2.2:8080/")}\"")
+```
+
+The default is the Android emulator's host loopback, so a local API works out of the box.
+
 ## Signing
 
 Resolved in order: `keystore.properties` at the Gradle root, then the `RELEASE_KEYSTORE_*`

@@ -56,6 +56,29 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
+      - name: Write local.properties
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          DEVICE_API_KEY: ${{ secrets.DEVICE_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          set -euo pipefail
+          # One place every app reads its environment config from. Keys are written only
+          # when set, so an app that does not use one simply falls back to its build
+          # default. sdk.dir is not needed: setup-android exports ANDROID_HOME.
+          : > local.properties
+          if [ -n "${API_BASE_URL:-}" ]; then
+            echo "api.base.url=${API_BASE_URL}" >> local.properties
+          fi
+          if [ -n "${DEVICE_API_KEY:-}" ]; then
+            echo "device.api.key=${DEVICE_API_KEY}" >> local.properties
+          fi
+          if [ -n "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            echo "google.maps.api.key=${GOOGLE_MAPS_API_KEY}" >> local.properties
+          fi
+          # Values are secrets, so report only which keys were written.
+          echo "wrote: $(cut -d= -f1 local.properties | tr '\n' ' ')"
+
       - name: Lint, test and compile
         run: ./gradlew ktlintCheck lintDebug testDebugUnitTest assembleDebug
 
@@ -83,6 +106,29 @@ jobs:
       - uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
 
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      - name: Write local.properties
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          DEVICE_API_KEY: ${{ secrets.DEVICE_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          set -euo pipefail
+          # One place every app reads its environment config from. Keys are written only
+          # when set, so an app that does not use one simply falls back to its build
+          # default. sdk.dir is not needed: setup-android exports ANDROID_HOME.
+          : > local.properties
+          if [ -n "${API_BASE_URL:-}" ]; then
+            echo "api.base.url=${API_BASE_URL}" >> local.properties
+          fi
+          if [ -n "${DEVICE_API_KEY:-}" ]; then
+            echo "device.api.key=${DEVICE_API_KEY}" >> local.properties
+          fi
+          if [ -n "${GOOGLE_MAPS_API_KEY:-}" ]; then
+            echo "google.maps.api.key=${GOOGLE_MAPS_API_KEY}" >> local.properties
+          fi
+          # Values are secrets, so report only which keys were written.
+          echo "wrote: $(cut -d= -f1 local.properties | tr '\n' ' ')"
 
       - name: Resolve version and enforce monotonic semver
         id: version
