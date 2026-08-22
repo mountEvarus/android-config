@@ -140,6 +140,13 @@ embedded Kotlin is too old to compile against KSP's current metadata:
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 ```
 
+## Submodules
+
+The workflow initialises **only** `packages/android-config`, not every submodule. A repo like
+finance also carries private `js-config` and `go-config` submodules, and `submodules: recursive`
+would fail trying to clone them with the default token. The Android build never reads them, so
+it does not ask for them, and no PAT is needed anywhere in this pipeline.
+
 ## Environment config
 
 The workflow writes `mobile/local.properties` before building, from repo-level settings:
