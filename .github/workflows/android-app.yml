@@ -46,9 +46,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Only android-config, deliberately. `submodules: recursive` would also clone a
-      # repo's js-config and go-config, which are private and would need a PAT, for
-      # submodules an Android build never reads. android-config is public, so this needs
-      # no token at all.
+      # repo's js-config and go-config, which an Android build never reads.
       - name: Fetch the android-config submodule
         working-directory: .
         run: |
@@ -111,9 +109,7 @@ jobs:
           fetch-depth: 0 # full history and tags, for the monotonic version check
 
       # Only android-config, deliberately. `submodules: recursive` would also clone a
-      # repo's js-config and go-config, which are private and would need a PAT, for
-      # submodules an Android build never reads. android-config is public, so this needs
-      # no token at all.
+      # repo's js-config and go-config, which an Android build never reads.
       - name: Fetch the android-config submodule
         working-directory: .
         run: |
