@@ -30,6 +30,9 @@ navigation = "2.9.5"
 hilt = "2.60.1"
 hilt-androidx = "1.2.0"
 
+# Coil 3 is the Compose-native image loader and shares the app's OkHttp stack, so a
+# catalogue of remote photographs needs no second HTTP client or cache to reason about.
+coil = "3.6.3"
 retrofit = "3.0.0"
 okhttp = "5.1.0"
 serialization = "1.9.0"
@@ -84,6 +87,8 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hilt-androidx" }
 hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hilt-androidx" }
 
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 retrofit-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
